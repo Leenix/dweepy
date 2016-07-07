@@ -41,17 +41,27 @@ def _check_stream_timeout(started, timeout):
 def _listen_for_dweets_from_response(response):
     """Yields dweets as received from dweet.io's streaming API
     """
-    streambuffer = ''
+    stream_buffer = ''
+    open_brackets = 0
+
     for byte in response.iter_content():
-        if byte:
-            streambuffer += byte.decode('ascii')
-            try:
-                dweet = json.loads(streambuffer.splitlines()[1])
-            except (IndexError, ValueError):
-                continue
+        if byte == '{':
+            open_brackets += 1
+
+        if open_brackets > 0:
+            stream_buffer += byte.decode('ascii')
+
+            if byte == '}':
+                open_brackets -= 1
+
+        elif len(stream_buffer) > 0:
+
+            print stream_buffer
+            dweet = json.loads('"{}"'.format(stream_buffer))
+
             if isstr(dweet):
                 yield json.loads(dweet)
-            streambuffer = ''
+            stream_buffer = ''
 
 
 def listen_for_dweets_from(thing_name, timeout=900, key=None):
