@@ -55,13 +55,12 @@ def _listen_for_dweets_from_response(response):
                 open_brackets -= 1
 
         elif len(stream_buffer) > 0:
-
-            print stream_buffer
             dweet = json.loads('"{}"'.format(stream_buffer))
 
             if isstr(dweet):
                 yield json.loads(dweet)
             stream_buffer = ''
+            open_brackets = 0   # Should already be 0, but just to be sure...
 
 
 def listen_for_dweets_from(thing_name, timeout=900, key=None):
